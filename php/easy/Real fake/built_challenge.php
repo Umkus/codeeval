@@ -153,6 +153,11 @@ class File
     {
         return file_put_contents($this->path, $file->read());
     }
+
+    public function getSize()
+    {
+        return filesize($this->path);
+    }
 }
 
 /**
@@ -181,11 +186,11 @@ abstract class ChallengeAbstract
 }
 
 /**
- * Lowercase challenge
+ * Outputs the file size
  *
- * @see https://www.codeeval.com/open_challenges/20/
+ * @see https://www.codeeval.com/open_challenges/227/
  */
-class ToLower extends ChallengeAbstract
+class RealFake extends ChallengeAbstract
 {
     /**
      * Solves the challenge
@@ -194,18 +199,52 @@ class ToLower extends ChallengeAbstract
     {
         $filePath = Cli::getArgument(0);
         $file     = new File($filePath);
-        $rows     = $file->toArray();
+        $numbers  = $file->toArray();
 
-        foreach ($rows as &$row) {
-            $row = strtolower($row);
+        foreach ($numbers as $number) {
+            $number = $this->filter($number);
+            $isReal = $this->isReal($number);
+            $status = $isReal ? 'Real' : 'Fake';
+
+            print $status . PHP_EOL;
         }
-        unset($row);
+    }
 
-        $rows = implode(PHP_EOL, $rows);
+    /**
+     * Removes non-number characters from the string
+     *
+     * @param string $number
+     *
+     * @return string
+     */
+    protected function filter($number)
+    {
+        return preg_replace('~[^0-9]~', '', $number);
+    }
 
-        print $rows;
+    /**
+     * Returns true if the CC is real
+     *
+     * @param string $number
+     *
+     * @return bool
+     */
+    protected function isReal($number)
+    {
+        $integers = str_split($number);
+        $sum      = 0;
+
+        foreach ($integers as $key => $int) {
+            if ($key % 2 === 0) {
+                $sum += ($int * 2);
+            } else {
+                $sum += $int;
+            }
+        }
+
+        return $sum % 10 === 0;
     }
 }
 
 
-new ToLower();
+new RealFake();

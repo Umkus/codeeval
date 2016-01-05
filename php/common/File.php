@@ -91,6 +91,11 @@ class File
     {
         return file_put_contents($this->path, $file->read());
     }
+
+    public function getSize()
+    {
+        return filesize($this->path);
+    }
 }
 
 
